@@ -101,6 +101,10 @@ Locales['fr'] = {
   ['commanderror_invalidcommand'] = '^3%s^0 n\'est pas une commande valide!',
   ['commanderror_invalidplayerid'] = 'il n\'ya aucun joueur avec cet ID en jeu',
   ['commandgeneric_playerid'] = 'id joueur',
+  ['command_setorg'] = 'assigner un gang à un joueur',
+  ['command_setorg_org'] = 'nom du gang',
+  ['command_setorg_gradeorg'] = 'grade du gang MAX 3',
+  ['command_setorg_invalid'] = 'le gang, le grade ou les deux sont invalides',
 
   -- Locale settings
   ['locale_digit_grouping_symbol'] = ' ',

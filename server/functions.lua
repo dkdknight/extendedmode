@@ -167,10 +167,12 @@ ESX.SavePlayer = function(xPlayer, cb)
 	if ExM.DatabaseType == "es+esx" then
 		-- Nothing yet ;)
 	elseif ExM.DatabaseType == "newesx" then
-		MySQL.Async.execute('UPDATE users SET accounts = @accounts, job = @job, job_grade = @job_grade, `group` = @group, loadout = @loadout, position = @position, inventory = @inventory WHERE identifier = @identifier', {
+		MySQL.Async.execute('UPDATE users SET accounts = @accounts, job = @job, job_grade = @job_grade, org = @org, org_gradeorg = @org_gradeorg, `group` = @group, loadout = @loadout, position = @position, inventory = @inventory WHERE identifier = @identifier', {
 			['@accounts'] = json.encode(xPlayer.getAccounts(true)),
 			['@job'] = xPlayer.job.name,
 			['@job_grade'] = xPlayer.job.grade,
+			['@org'] = xPlayer.org.name,
+			['@org_gradeorg'] = xPlayer.org.gradeorg,
 			['@group'] = xPlayer.getGroup(),
 			['@loadout'] = json.encode(xPlayer.getLoadout(true)),
 			['@position'] = json.encode(xPlayer.getCoords()),
@@ -293,6 +295,18 @@ ESX.DoesJobExist = function(job, grade)
 
 	if job and grade then
 		if ESX.Jobs[job] and ESX.Jobs[job].grades[grade] then
+			return true
+		end
+	end
+
+	return false
+end
+
+ESX.DoesorgExist = function(org, gradeorg)
+	gradeorg = tostring(gradeorg)
+
+	if org and gradeorg then
+		if ESX.orgs[org] and ESX.orgs[org].gradeorgs[gradeorg] then
 			return true
 		end
 	end

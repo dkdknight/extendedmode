@@ -61,12 +61,12 @@ AddEventHandler('playerConnecting', function(name, setCallback, deferrals)
 		end
 	end
 
-	if not ExM.DatabaseReady then
-		deferrals.update("The database is not initialized, please wait...")
-		while not ExM.DatabaseReady do
-			Wait(1000)
-		end
-	end
+	--if not ExM.DatabaseReady then
+	--	deferrals.update("The database is not initialized, please wait...")
+	--	while not ExM.DatabaseReady do
+	--		Wait(1000)
+	--	end
+	--end
 
 	if identifier then
 		if ESX.GetPlayerFromIdentifier(identifier) then
@@ -87,15 +87,17 @@ function loadESXPlayer(identifier, playerId)
 		accounts = {},
 		inventory = {},
 		job = {},
+		org          = {},
 		loadout = {},
 		playerName = GetPlayerName(playerId),
 		weight = 0
 	}
 
-	MySQL.Async.fetchAll('SELECT accounts, job, job_grade, `group`, loadout, position, inventory FROM users WHERE identifier = @identifier', {
+	MySQL.Async.fetchAll('SELECT accounts, job, job_grade, org, org_gradeorg, `group`, loadout, position, inventory FROM users WHERE identifier = @identifier', {
 		['@identifier'] = identifier
 	}, function(result)
 		local job, grade, jobObject, gradeObject = result[1].job, tostring(result[1].job_grade)
+		local org, gradeorg, orgObject, gradeorgObject = result[1].org, tostring(result[1].org_gradeorg)
 		local foundAccounts, foundItems = {}, {}
 
 		-- Accounts
@@ -138,6 +140,30 @@ function loadESXPlayer(identifier, playerId)
 
 		if gradeObject.skin_male then userData.job.skin_male = json.decode(gradeObject.skin_male) end
 		if gradeObject.skin_female then userData.job.skin_female = json.decode(gradeObject.skin_female) end
+		
+		-- org
+		if ESX.DoesorgExist(org, gradeorg) then
+			orgObject, gradeorgObject = ESX.orgs[org], ESX.orgs[org].gradeorgs[gradeorg]
+		else
+			print(('[ExtendedMode] [^3WARNING^7] Ignoring invalid org for %s [org: %s, gradeorg: %s]'):format(identifier, org, gradeorg))
+			org, gradeorg = 'unemployed', '0'
+			orgObject, gradeorgObject = ESX.orgs[org], ESX.orgs[org].gradeorgs[gradeorg]
+		end
+
+		userData.org.id = orgObject.id
+		userData.org.name = orgObject.name
+		userData.org.label = orgObject.label
+
+		userData.org.gradeorg = tonumber(gradeorg)
+		userData.org.gradeorg_name = gradeorgObject.name
+		userData.org.gradeorg_label = gradeorgObject.label
+		userData.org.gradeorg_salary = gradeorgObject.salary
+
+		userData.org.skin_male = {}
+		userData.org.skin_female = {}
+
+		if gradeorgObject.skin_male then userData.org.skin_male = json.decode(gradeorgObject.skin_male) end
+		if gradeorgObject.skin_female then userData.org.skin_female = json.decode(gradeorgObject.skin_female) end
 
 		-- Inventory
 		if result[1].inventory and result[1].inventory ~= '' then
@@ -214,7 +240,7 @@ function loadESXPlayer(identifier, playerId)
 		end
 
 		-- Create Extended Player Object
-		local xPlayer = CreateExtendedPlayer(playerId, identifier, userData.group, userData.accounts, userData.inventory, userData.weight, userData.job, userData.loadout, userData.playerName, userData.coords)
+		local xPlayer = CreateExtendedPlayer(playerId, identifier, userData.group, userData.accounts, userData.inventory, userData.weight, userData.job, userData.org, userData.loadout, userData.playerName, userData.coords)
 		ESX.Players[playerId] = xPlayer
 		TriggerEvent('esx:playerLoaded', playerId, xPlayer)
 
@@ -224,6 +250,7 @@ function loadESXPlayer(identifier, playerId)
 			identifier = xPlayer.getIdentifier(),
 			inventory = xPlayer.getInventory(),
 			job = xPlayer.getJob(),
+			org = xPlayer.getorg(),
 			loadout = xPlayer.getLoadout(),
 			maxWeight = xPlayer.maxWeight,
 			money = xPlayer.getMoney()
@@ -464,6 +491,7 @@ ESX.RegisterServerCallback('esx:getPlayerData', function(source, cb)
 		accounts     = xPlayer.getAccounts(),
 		inventory    = xPlayer.getInventory(),
 		job          = xPlayer.getJob(),
+		org          = xPlayer.getorg(),
 		loadout      = xPlayer.getLoadout(),
 		money        = xPlayer.getMoney()
 	})
@@ -477,6 +505,7 @@ ESX.RegisterServerCallback('esx:getOtherPlayerData', function(source, cb, target
 		accounts     = xPlayer.getAccounts(),
 		inventory    = xPlayer.getInventory(),
 		job          = xPlayer.getJob(),
+		org          = xPlayer.getorg(),
 		loadout      = xPlayer.getLoadout(),
 		money        = xPlayer.getMoney()
 	})

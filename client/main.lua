@@ -42,6 +42,17 @@ AddEventHandler('esx:playerLoaded', function(playerData)
 			job_label = playerData.job.label,
 			grade_label = playerData.job.grade_label
 		})
+		
+		local orgTpl = '<div>{{org_label}} - {{gradeorg_label}}</div>'
+
+		if playerData.org.gradeorg_label == '' or playerData.org.gradeorg_label == playerData.org.label then
+			orgTpl = '<div>{{org_label}}</div>'
+		end
+
+		ESX.UI.HUD.RegisterElement('org', #playerData.accounts, 0, orgTpl, {
+			org_label = playerData.org.label,
+			gradeorg_label = playerData.org.gradeorg_label
+		})
 	end
 
 	-- Using spawnmanager now to spawn the player, this is the right way to do it, and it transitions better.
@@ -193,6 +204,11 @@ AddEventHandler('esx:setJob', function(job)
 	ESX.PlayerData.job = job
 end)
 
+RegisterNetEvent('esx:setOrg')
+AddEventHandler('esx:setOrg', function(org)
+	ESX.PlayerData.org = org
+end)
+
 RegisterNetEvent('esx:addWeapon')
 AddEventHandler('esx:addWeapon', function(weaponName, ammo)
 	-- Removed PlayerPedId() from being stored in a variable, not needed
@@ -243,6 +259,16 @@ AddEventHandler('esx:setJob', function(job)
 		ESX.UI.HUD.UpdateElement('job', {
 			job_label   = job.label,
 			grade_label = job.grade_label
+		})
+	end
+end)
+
+RegisterNetEvent('esx:setorg')
+AddEventHandler('esx:setorg', function(org)
+	if Config.EnableHud then
+		ESX.UI.HUD.UpdateElement('org', {
+			org_label   = org.label,
+			gradeorg_label = org.gradeorg_label
 		})
 	end
 end)

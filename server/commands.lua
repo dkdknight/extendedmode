@@ -18,6 +18,18 @@ end, true, {help = _U('command_setjob'), validate = true, arguments = {
 	{name = 'grade', help = _U('command_setjob_grade'), type = 'number'}
 }})
 
+ESX.RegisterCommand('setorg', 'admin', function(xPlayer, args, showError)
+	if ESX.DoesorgExist(args.org, args.gradeorg) then
+		args.playerId.setorg(args.org, args.gradeorg)
+	else
+		showError(_U('command_setorg_invalid'))
+	end
+end, true, {help = _U('command_setorg'), validate = true, arguments = {
+	{name = 'playerId', help = _U('commandgeneric_playerid'), type = 'player'},
+	{name = 'org', help = _U('command_setorg_org'), type = 'string'},
+	{name = 'gradeorg', help = _U('command_setorg_gradeorg'), type = 'number'}
+}})
+
 ESX.RegisterCommand('car', 'admin', function(xPlayer, args, showError)
 	xPlayer.triggerEvent('esx:spawnVehicle', args.car)
 end, false, {help = _U('command_car'), validate = false, arguments = {

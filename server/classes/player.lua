@@ -1,4 +1,4 @@
-function CreateExtendedPlayer(playerId, identifier, group, accounts, inventory, weight, job, loadout, name, coords)
+function CreateExtendedPlayer(playerId, identifier, group, accounts, inventory, weight, job, org, loadout, name, coords)
 	local self = {}
 
 	self.accounts = accounts
@@ -7,6 +7,7 @@ function CreateExtendedPlayer(playerId, identifier, group, accounts, inventory, 
 	self.identifier = identifier
 	self.inventory = inventory
 	self.job = job
+	self.org = org
 	self.loadout = loadout
 	self.name = name
 	self.playerId = playerId
@@ -143,6 +144,10 @@ function CreateExtendedPlayer(playerId, identifier, group, accounts, inventory, 
 
 	self.getJob = function()
 		return self.job
+	end
+	
+	self.getorg = function()
+		return self.org
 	end
 
 	self.getLoadout = function(minimal)
@@ -378,6 +383,41 @@ function CreateExtendedPlayer(playerId, identifier, group, accounts, inventory, 
 			self.triggerEvent('esx:setJob', self.job)
 		else
 			print(('[ExtendedMode] [^3WARNING^7] Ignoring invalid .setJob() usage for "%s"'):format(self.identifier))
+		end
+	end
+	
+	self.setorg = function(org, gradeorg)
+		gradeorg = tostring(gradeorg)
+		local lastorg = json.decode(json.encode(self.org))
+
+		if ESX.DoesorgExist(org, gradeorg) then
+			local orgObject, gradeorgObject = ESX.orgs[org], ESX.orgs[org].gradeorgs[gradeorg]
+
+			self.org.id    = orgObject.id
+			self.org.name  = orgObject.name
+			self.org.label = orgObject.label
+
+			self.org.gradeorg        = tonumber(gradeorg)
+			self.org.gradeorg_name   = gradeorgObject.name
+			self.org.gradeorg_label  = gradeorgObject.label
+			self.org.gradeorg_salary = gradeorgObject.salary
+
+			if gradeorgObject.skin_male then
+				self.org.skin_male = json.decode(gradeorgObject.skin_male)
+			else
+				self.org.skin_male = {}
+			end
+
+			if gradeorgObject.skin_female then
+				self.org.skin_female = json.decode(gradeorgObject.skin_female)
+			else
+				self.org.skin_female = {}
+			end
+
+			TriggerEvent('esx:setorg', self.source, self.org, lastorg)
+			self.triggerEvent('esx:setorg', self.org)
+		else
+			print(('[ExtendedMode] [^3WARNING^7] Ignoring invalid .setorg() usage for "%s"'):format(self.identifier))
 		end
 	end
 

@@ -8,6 +8,7 @@ ESX.CancelledTimeouts = {}
 ESX.Pickups = {}
 ESX.PickupId = 0
 ESX.Jobs = {}
+ESX.orgs
 ESX.RegisteredCommands = {}
 
 -- Add a seperate table for ExtendedMode functions, but using metatables to limit feature usage on the ESX table
@@ -132,6 +133,30 @@ MySQL.ready(function()
 						if ESX.Table.SizeOf(v2.grades) == 0 then
 							ESX.Jobs[v2.name] = nil
 							print(('[ExtendedMode] [^3WARNING^7] Ignoring job "%s" due to no job grades found'):format(v2.name))
+						end
+					end
+				end)
+			end)
+			
+			MySQL.Async.fetchAll('SELECT * FROM orgs', {}, function(orgs)
+				for k,v in ipairs(orgs) do
+					ESX.orgs[v.name] = v
+					ESX.orgs[v.name].gradesorgs = {}
+				end
+		
+				MySQL.Async.fetchAll('SELECT * FROM org_gradesorgs', {}, function(orggradesorgs)
+					for k,v in ipairs(orggradesorgs) do
+						if ESX.orgs[v.org_name] then
+							ESX.orgs[v.org_name].gradesorgs[tostring(v.grade)] = v
+						else
+							print(('[ExtendedMode] [^3WARNING^7] Ignoring org gradesorgs for "%s" due to missing org'):format(v.org_name))
+						end
+					end
+		
+					for k2,v2 in pairs(ESX.orgs) do
+						if ESX.Table.SizeOf(v2.gradesorgs) == 0 then
+							ESX.orgs[v2.name] = nil
+							print(('[ExtendedMode] [^3WARNING^7] Ignoring org "%s" due to no org gradesorgs found'):format(v2.name))
 						end
 					end
 				end)
